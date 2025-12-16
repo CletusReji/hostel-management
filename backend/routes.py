@@ -90,13 +90,26 @@ def student_dashboard():
     
     return render_template('student_dashboard.html', user=current_user, balance=balance, total_paid=total_paid)
 
+from werkzeug.utils import secure_filename
+import os
+
 @app.route('/complaint/raise', methods=['POST'])
 @login_required
 def raise_complaint():
     title = request.form.get('title')
     description = request.form.get('description')
+    file = request.files.get('image') # Get the optional file
     
-    complaint = Complaint(title=title, description=description, student_id=current_user.id)
+    filename = None
+    if file and file.filename != '':
+        filename = secure_filename(file.filename)
+        # Ensure unique name to prevent overwrite could be done here, keeping simple for now
+        # Or better, prepend student id or timestamp
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        filename = f"{timestamp}_{filename}"
+        file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
+    
+    complaint = Complaint(title=title, description=description, image_file=filename, student_id=current_user.id)
     db.session.add(complaint)
     db.session.commit()
     flash('Complaint Submitted', 'success')
@@ -114,11 +127,26 @@ def admin_dashboard():
     users = User.query.filter_by(role='student').all()
     complaints = Complaint.query.all()
     
+    # Calculate Pending Dues
+    pending_dues = []
+    for s in users:
+        total_rent = sum(r.amount for r in s.rents)
+        total_paid = sum(t.amount for t in s.transactions)
+        balance = total_rent - total_paid
+        if balance > 0:
+            pending_dues.append({
+                'id': s.id,
+                'name': s.full_name,
+                'room': s.room.room_number if s.room else 'N/A',
+                'amount': balance
+            })
+    
     return render_template('admin_dashboard.html', 
                          total=total_rooms, 
                          occupied=occupied, 
                          users=users, 
-                         complaints=complaints)
+                         complaints=complaints,
+                         pending_dues=pending_dues)
 
 @app.route('/admin/complaint/<int:id>/resolve')
 @login_required

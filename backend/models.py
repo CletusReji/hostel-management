@@ -34,6 +34,7 @@ class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    image_file = db.Column(db.String(100), nullable=True) # Added
     status = db.Column(db.String(20), default='Pending') # Pending, Resolved
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

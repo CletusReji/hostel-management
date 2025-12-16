@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key-change-this'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hostel.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads' # Configured Upload Folder
 
 # Initialize Extensions
 db.init_app(app)
