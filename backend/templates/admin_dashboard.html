@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<div class="grid">
+    <div class="card">
+        <h3>Occupancy Stats</h3>
+        <p style="font-size: 2rem;">{{ occupied }} / {{ total }} Rooms</p>
+    </div>
+
+    <div class="card">
+        <h3>Assign Monthly Rent</h3>
+        <form method="POST" action="{{ url_for('assign_rent') }}" class="flex">
+            <!-- Dropdown for Month -->
+            <select name="month" required>
+                <option value="" disabled selected>Select Month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+
+            <!-- Dropdown for Year -->
+            <select name="year" required>
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+                <option value="2026">2026</option>
+            </select>
+
+            <input type="number" name="amount" placeholder="Amount (Rs.)" required>
+            <button type="submit">Publish Rent</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3>Student List</h3>
+        {% for s in users %}
+        <div class="student-item flex" style="align-items: center;">
+            <div>
+                <strong>{{ s.full_name }}</strong> (Room {% if s.room %}{{ s.room.room_number }}{% else %}N/A{% endif
+                %})
+            </div>
+            <div>
+                <a href="{{ url_for('student_details', id=s.id) }}" class="badge"
+                    style="background: var(--primary); color: white; text-decoration: none;">View Details / Manage
+                    Rent</a>
+            </div>
+        </div>
+        {% else %}
+        <p>No students registered.</p>
+        {% endfor %}
+    </div>
+
+    <div class="card">
+        <h3>All Complaints</h3>
+        {% for c in complaints %}
+        <div class="complaint-item">
+            <div class="flex">
+                <strong>{{ c.title }} <small>({{ c.student.full_name }})</small></strong>
+                {% if c.status == 'Pending' %}
+                <a href="{{ url_for('resolve_complaint', id=c.id) }}" class="badge"
+                    style="background: white; color: black; text-decoration: none;">Mark Resolved</a>
+                {% else %}
+                <span class="badge Resolved">Resolved</span>
+                {% endif %}
+            </div>
+            <p>{{ c.description }}</p>
+        </div>
+        {% else %}
+        <p>No complaints.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="{{ url_for('admin_dashboard') }}" style="display: inline-block; margin-bottom: 1rem;">&larr; Back to
+    Dashboard</a>
+
+<h1>Student Details: {{ student.full_name }}</h1>
+
+<div class="grid">
+    <div class="card">
+        <h3>Profile</h3>
+        <p><strong>Username:</strong> {{ student.username }}</p>
+        <p><strong>Room:</strong> {% if student.room %}{{ student.room.room_number }}{% else %}Not Assigned{% endif %}
+        </p>
+        <p><strong>Phone:</strong> {{ student.phone if student.phone else 'N/A' }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Payment Status</h3>
+        <div style="font-size: 1.5rem; margin-bottom: 1rem;">
+            Total Billed: <span style="color: #94a3b8;">Rs. {{ total_rent }}</span><br>
+            Total Paid: <span style="color: #10b981;">Rs. {{ total_paid }}</span><br>
+            <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #475569;">
+                Balance Due:
+                {% if balance > 0 %}
+                <strong style="color: #ef4444;">Rs. {{ balance }}</strong>
+                {% else %}
+                <strong style="color: #10b981;">Paid (Rs. 0)</strong>
+                {% endif %}
+            </div>
+        </div>
+
+        <h4>Add Payment</h4>
+        <form action="{{ url_for('add_payment', id=student.id) }}" method="POST" class="flex">
+            <input type="number" name="amount" placeholder="Amount (Rs.)" step="0.01" required>
+            <button type="submit">Record Payment</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3>Bill History</h3>
+        {% if student.rents %}
+        <ul style="list-style: none; padding: 0;">
+            {% for r in student.rents %}
+            <li style="border-bottom: 1px solid #334155; padding: 0.5rem 0;" class="flex">
+                <span>{{ r.month }}</span>
+                <span>Rs. {{ r.amount }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No bills generated.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Transaction History</h3>
+        {% if student.transactions %}
+        <ul style="list-style: none; padding: 0;">
+            {% for t in student.transactions %}
+            <li style="border-bottom: 1px solid #334155; padding: 0.5rem 0;" class="flex">
+                <span>Data: {{ t.date.strftime('%Y-%m-%d %H:%M') }}</span>
+                <span style="color: #10b981;">+ Rs. {{ t.amount }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No payments recorded.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

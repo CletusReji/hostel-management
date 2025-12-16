@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome, {{ user.full_name }}!</h1>
+
+<div class="grid">
+    <div class="card">
+        <h3>Your Room</h3>
+        <p style="font-size: 2rem; font-weight: bold;">
+            {% if user.room %}
+            {{ user.room.room_number }}
+            {% else %}
+            not Assigned
+            {% endif %}
+        </p>
+        {% if user.room and balance <= 0 %} <form action="{{ url_for('vacate_room') }}" method="POST"
+            onsubmit="return confirm('Are you sure you want to vacate? This cannot be undone.');"
+            style="margin-top: 5px;">
+            <button type="submit"
+                style="background: none; border: none; padding: 0; color: #64748b; text-decoration: underline; font-size: 0.85rem; cursor: pointer;">Vacate
+                Room</button>
+            </form>
+            {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Rent & Payment Status</h3>
+        <div class="flex" style="padding: 0.5rem 0; border-bottom: 1px solid #334155;">
+            <span>Total Billed</span>
+            <span>Rs. {{ user.rents | sum(attribute='amount') }}</span>
+        </div>
+        <div class="flex" style="padding: 0.5rem 0; border-bottom: 1px solid #334155;">
+            <span>Total Paid</span>
+            <span style="color: #10b981;">Rs. {{ total_paid }}</span>
+        </div>
+        <div class="flex" style="padding: 0.5rem 0; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+            <span>Current Balance Due</span>
+            {% if balance > 0 %}
+            <span style="color: #ef4444;">Rs. {{ balance }}</span>
+            {% else %}
+            <span style="color: #10b981;">Paid (Rs. 0)</span>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<div class="card">
+    <h3>Raise a Complaint</h3>
+    <form method="POST" action="{{ url_for('raise_complaint') }}">
+        <div class="form-group">
+            <input type="text" name="title" placeholder="Issue Title (e.g. WiFi not working)" required>
+        </div>
+        <div class="form-group">
+            <textarea name="description" rows="3" placeholder="Describe the issue..." required></textarea>
+        </div>
+        <button type="submit">Submit Complaint</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Your Complaints</h3>
+    {% if user.complaints %}
+    {% for c in user.complaints %}
+    <div class="complaint-item">
+        <div class="flex">
+            <strong>{{ c.title }}</strong>
+            <span class="badge {{ c.status }}">{{ c.status }}</span>
+        </div>
+        <p style="margin: 0.5rem 0 0; opacity: 0.8;">{{ c.description }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No complaints submitted.</p>
+    {% endif %}
+</div>
+{% endblock %}
